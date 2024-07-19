@@ -1,7 +1,7 @@
 import * as dotenv from 'dotenv'
 
-const isProduction = process.env.NODE_ENV === 'production'
-dotenv.config({ path: isProduction ? '.env' : '.env.local' })
+const isLocal = process.env.NODE_ENV === 'local'
+dotenv.config({ path: isLocal ? '.env.local' : '.env' })
 
 const nodes = [
     {
@@ -32,4 +32,4 @@ const localConfig = {
     nodes: nodes,
 }
 
-export default () => (isProduction ? productionConfig : localConfig)
+export default () => (isLocal ? localConfig : productionConfig)
