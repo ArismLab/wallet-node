@@ -23,7 +23,7 @@ const productionConfig = {
 }
 
 const localConfig = {
-    url: nodes.find((node) => node.id === Number(process.env.NODE_ID)).url,
+    url: `http://127.0.0.1:300${process.env.NODE_ID}`,
     port: 3000 + Number(process.env.NODE_ID),
     database: {
         mongoUri: `mongodb+srv://kiet1618:12052002@kltn.mbww3bu.mongodb.net/node${process.env.NODE_ID}?retryWrites=true&w=majority`,
