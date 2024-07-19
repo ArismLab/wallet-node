@@ -6,10 +6,10 @@ dotenv.config({ path: isLocal ? '.env.local' : '.env' })
 const nodes = [
     {
         id: 1,
-        url: 'https://average-leonora-snowyfield1906-afbf7760.koyeb.app/',
+        url: 'https://node1-arismlab.koyeb.app/',
     },
-    { id: 2, url: '' },
-    { id: 3, url: '' },
+    { id: 2, url: 'https://node2-arismlab.koyeb.app/' },
+    { id: 3, url: 'https://node3-arismlab.koyeb.app/' },
 ]
 
 const productionConfig = {
