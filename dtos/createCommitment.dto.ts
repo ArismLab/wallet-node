@@ -5,5 +5,5 @@ export class CreateCommitmentDto {
     readonly commitment: string
 
     @IsNotEmpty()
-    readonly tempPublicKey: string
+    readonly clientPublicKey: string
 }

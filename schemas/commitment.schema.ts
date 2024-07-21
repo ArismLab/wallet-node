@@ -9,7 +9,7 @@ export class Commitment {
     commitment: string
 
     @Prop()
-    tempPublicKey: string
+    clientPublicKey: string
 }
 
 export const CommitmentSchema = SchemaFactory.createForClass(Commitment)

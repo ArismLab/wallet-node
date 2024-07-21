@@ -9,7 +9,7 @@ export class ConstructMasterShareDto {
     readonly idToken: string
 
     @IsNotEmpty()
-    readonly tempPublicKey: string
+    readonly clientPublicKey: string
 
     readonly commitments: CommitmentDto[]
 }

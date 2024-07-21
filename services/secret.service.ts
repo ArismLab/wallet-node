@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common'
 import { InjectModel } from '@nestjs/mongoose'
 import { Model } from 'mongoose'
 import { Secret, SecretDocument } from '@schemas'
-import { EC } from '@common'
+import { C } from '@common'
 import { sumMod } from '@libs/arithmetic'
 
 @Injectable()
@@ -13,8 +13,7 @@ export class SecretService {
     ) {}
 
     async initialize(user: string): Promise<string> {
-        const keyPair = EC.secp256k1.genKeyPair()
-        const secret = keyPair.getPrivate('hex')
+        const secret = C.generatePrivateKey()
 
         await this.secretModel.create({ secret, user })
 
@@ -28,18 +27,15 @@ export class SecretService {
     async receiveShare(user: string, receivedShare: string): Promise<void> {
         const secret = await this.secretModel.findOne({ user })
 
-        secret.receivedShares.push(receivedShare)
-        const receivedShares = secret.receivedShares
+        const receivedShares = [...secret.receivedShares, receivedShare]
 
         await this.secretModel.updateOne({ user }, { receivedShares })
     }
 
     async deriveMasterShare(user: string): Promise<void> {
-        const secret: Secret = await this.secretModel.findOne({
-            user,
-        })
+        const secret: Secret = await this.secretModel.findOne({ user })
 
-        const masterShare = sumMod(secret.receivedShares, EC.ORDER)
+        const masterShare = sumMod(secret.receivedShares, C.ORDER)
 
         await this.secretModel.updateOne({ user }, { masterShare })
     }

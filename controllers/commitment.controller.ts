@@ -2,7 +2,7 @@ import { BadRequestException, Body, Controller, Post } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import { CommitmentDto, CreateCommitmentDto } from '@dtos'
 import { CommitmentService } from '@services'
-import { EC } from '@common'
+import { C } from '@common'
 
 @Controller('commitment')
 export class CommitmentController {
@@ -12,10 +12,8 @@ export class CommitmentController {
     ) {}
 
     @Post()
-    async createCommitment(
-        @Body() data: CreateCommitmentDto
-    ): Promise<CommitmentDto> {
-        const { commitment, tempPublicKey } = data
+    async createCommitment(@Body() data: CreateCommitmentDto): Promise<CommitmentDto> {
+        const { commitment, clientPublicKey } = data
 
         const existedCommitment = await this.commitmentService.find(commitment)
 
@@ -23,15 +21,13 @@ export class CommitmentController {
             throw new BadRequestException('Commitment already exists')
         }
 
-        await this.commitmentService.create(commitment, tempPublicKey)
+        await this.commitmentService.create(commitment, clientPublicKey)
 
         const privateKey = this.configService.get<string>('privateKey')
-        const keyPair = EC.secp256k1.keyFromPrivate(privateKey)
+        const keyPair = C.secp256k1.keyFromPrivate(privateKey)
         const publicKey = keyPair.getPublic('hex')
 
-        const signature = keyPair
-            .sign(commitment + ',' + tempPublicKey)
-            .toDER('hex')
+        const signature = keyPair.sign(commitment + ',' + clientPublicKey).toDER('hex')
 
         return { signature, publicKey }
     }

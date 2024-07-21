@@ -29,7 +29,10 @@ const localConfig = {
         mongoUri: `mongodb+srv://kiet1618:12052002@kltn.mbww3bu.mongodb.net/node${process.env.NODE_ID}?retryWrites=true&w=majority`,
     },
     privateKey: process.env[`NODE${process.env.NODE_ID}_PRIVATE_KEY`],
-    nodes: nodes,
+    nodes: nodes.map((node) => ({
+        ...node,
+        url: `http://127.0.0.1:300${node.id}`,
+    })),
 }
 
 export default () => (isLocal ? localConfig : productionConfig)

@@ -1,15 +1,9 @@
-import {
-    BadRequestException,
-    Body,
-    Controller,
-    Post,
-    UseGuards,
-} from '@nestjs/common'
+import { BadRequestException, Body, Controller, Post, UseGuards } from '@nestjs/common'
+import { C, E, H } from '@common'
 import { ConfigService } from '@nestjs/config'
 import { VerifyGuard } from '@verifiers/verify.guard'
 import { ConstructMasterShareDto, MasterShareDto } from '@dtos'
 import { CommitmentService, SecretService, WalletService } from '@services'
-import { C, EC, H } from '@common'
 
 @Controller('secret')
 export class SecretController {
@@ -22,19 +16,14 @@ export class SecretController {
 
     @Post()
     @UseGuards(VerifyGuard)
-    async constructMasterShare(
-        @Body() data: ConstructMasterShareDto
-    ): Promise<MasterShareDto> {
-        const { idToken, tempPublicKey, commitments, user } = data
+    async constructMasterShare(@Body() data: ConstructMasterShareDto): Promise<MasterShareDto> {
+        const { idToken, clientPublicKey, commitments, user } = data
 
         const hashedIdToken = H.keccak256(idToken)
-        const existedCommitment =
-            await this.commitmentService.find(hashedIdToken)
+        const existedCommitment = await this.commitmentService.find(hashedIdToken)
 
         if (!existedCommitment) {
-            throw new BadRequestException(
-                "Commitment of Id Token doesn't exist."
-            )
+            throw new BadRequestException("Commitment of Id Token doesn't exist.")
         }
 
         const wallet = await this.walletService.find(user)
@@ -43,16 +32,11 @@ export class SecretController {
         }
 
         const privateKey = this.configService.get<string>('privateKey')
-        const keyPair = EC.secp256k1.keyFromPrivate(privateKey)
-        const publicKey = keyPair.getPublic('hex')
+        const publicKey = C.getPublicKeyFromPrivateKey(privateKey)
 
-        const commitment = commitments.find(
-            (node) => node.publicKey === publicKey
-        )
+        const commitment = commitments.find((node) => node.publicKey === publicKey)
         if (!commitment) {
-            throw new BadRequestException(
-                'Commitment does not contain in this node'
-            )
+            throw new BadRequestException('Commitment does not contain in this node')
         }
 
         const secret = await this.secretService.find(user)
@@ -60,21 +44,8 @@ export class SecretController {
             throw new BadRequestException('Not found secret by user')
         }
 
-        const { masterShare } = secret
-        const { mac, ciphertext, iv, ephemPublicKey } = await C.encrypt(
-            Buffer.from(tempPublicKey, 'hex'),
-            Buffer.from(masterShare)
-        )
+        const ecies = await E.encrypt(clientPublicKey, secret.masterShare)
 
-        return {
-            publicKey: wallet.publicKey,
-            threshold: 1,
-            ciphertext: ciphertext.toString('hex'),
-            metadata: {
-                mac: mac.toString('hex'),
-                iv: iv.toString('hex'),
-                ephemPublicKey: ephemPublicKey.toString('hex'),
-            },
-        }
+        return { publicKey: wallet.publicKey, ecies }
     }
 }

@@ -10,11 +10,11 @@ export class CommitmentService {
         private commitmentModel: Model<CommitmentDocument>
     ) {}
 
-    async create(
-        commitment: string,
-        tempPublicKey: string
-    ): Promise<Commitment> {
-        return await this.commitmentModel.create({ commitment, tempPublicKey })
+    async create(commitment: string, clientPublicKey: string): Promise<Commitment> {
+        return await this.commitmentModel.create({
+            commitment,
+            clientPublicKey,
+        })
     }
 
     async find(commitment: string): Promise<Commitment> {

@@ -15,8 +15,9 @@ export class WalletController {
 
         if (existedWallet) return existedWallet
 
-        const { address, publicKey } =
-            await this.communicationService.generateSharedSecret(data.user)
+        const { address, publicKey } = await this.communicationService.generateSharedSecret(
+            data.user
+        )
 
         return this.walletService.create(data.user, address, publicKey)
     }

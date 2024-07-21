@@ -1,12 +1,7 @@
-import {
-    Body,
-    Controller,
-    InternalServerErrorException,
-    Post,
-} from '@nestjs/common'
+import { Body, Controller, InternalServerErrorException, Post } from '@nestjs/common'
+import { C } from '@common'
 import { SecretService, WalletService, CommunicationService } from '@services'
 import { ReceiveShareDto, CreateWalletDto } from '@dtos'
-import { EC } from '@common'
 
 @Controller('communication')
 export class CommunicationController {
@@ -20,14 +15,11 @@ export class CommunicationController {
     async initializeSecret(@Body() data: { user: string }): Promise<any> {
         try {
             const secret = await this.secretService.initialize(data.user)
-            const keyPair = EC.secp256k1.keyFromPrivate(secret)
-            const publicKey = keyPair.getPublic().encode('hex', false)
+            const publicKey = C.getPublicKeyFromPrivateKey(secret)
             return publicKey
         } catch (error) {
             console.error(error.message)
-            throw new InternalServerErrorException(
-                'Error when secretService.initialize'
-            )
+            throw new InternalServerErrorException('Error when secretService.initialize')
         }
     }
 
@@ -37,9 +29,7 @@ export class CommunicationController {
             await this.communicationService.generateShares(data.user)
         } catch (error) {
             console.error(error.message)
-            throw new InternalServerErrorException(
-                'Error when communicationService.generateShares'
-            )
+            throw new InternalServerErrorException('Error when communicationService.generateShares')
         }
     }
 
@@ -49,37 +39,27 @@ export class CommunicationController {
             await this.secretService.receiveShare(data.user, data.receivedShare)
         } catch (error) {
             console.error(error.message)
-            throw new InternalServerErrorException(
-                'Error when secretService.receiveShare'
-            )
+            throw new InternalServerErrorException('Error when secretService.receiveShare')
         }
     }
 
-    @Post('derive-master-share')
+    @Post('compute-master-share')
     async deriveMasterShare(@Body() data: { user: string }): Promise<void> {
         try {
             await this.secretService.deriveMasterShare(data.user)
         } catch (error) {
             console.error(error.message)
-            throw new InternalServerErrorException(
-                'Error when secretService.deriveMasterShare'
-            )
+            throw new InternalServerErrorException('Error when secretService.deriveMasterShare')
         }
     }
 
     @Post('create-wallet')
     async createWallet(@Body() data: CreateWalletDto): Promise<void> {
         try {
-            await this.walletService.create(
-                data.user,
-                data.address,
-                data.publicKey
-            )
+            await this.walletService.create(data.user, data.address, data.publicKey)
         } catch (error) {
             console.error(error.message)
-            throw new InternalServerErrorException(
-                'Error when walletService.create'
-            )
+            throw new InternalServerErrorException('Error when walletService.create')
         }
     }
 }

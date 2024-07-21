@@ -10,13 +10,9 @@ export class GoogleVerifier {
 
     async verify(idToken: string, verifierId: string): Promise<boolean> {
         try {
-            const response = await get(
-                this.httpService,
-                TOKEN_INFO_GOOGLE_API,
-                {
-                    id_token: idToken,
-                }
-            )
+            const response = await get(this.httpService, TOKEN_INFO_GOOGLE_API, {
+                id_token: idToken,
+            })
 
             const { email } = response.data
             if (email !== verifierId) return false

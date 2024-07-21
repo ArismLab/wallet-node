@@ -12,9 +12,7 @@ export const post = async (
         httpService.post(url, data).pipe(
             catchError((error: any) => {
                 console.error(error.message)
-                throw new InternalServerErrorException(
-                    `Error when making POST to ${url}`
-                )
+                throw new InternalServerErrorException(`Error when making POST to ${url}`)
             })
         )
     )
@@ -29,9 +27,7 @@ export const get = async (
         httpService.get(url, { params: data }).pipe(
             catchError((error: any) => {
                 console.error(error.message)
-                throw new InternalServerErrorException(
-                    `Error when making GET to ${url}`
-                )
+                throw new InternalServerErrorException(`Error when making GET to ${url}`)
             })
         )
     )
