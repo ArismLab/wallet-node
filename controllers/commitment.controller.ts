@@ -1,8 +1,9 @@
-import { BadRequestException, Body, Controller, Post } from '@nestjs/common'
+import { BadRequestException, Body, Controller, InternalServerErrorException, Post } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
-import { CommitmentDto, CreateCommitmentDto } from '@dtos'
+import { CommitmentDto, ExchangeCommitmentDto } from '@dtos'
 import { CommitmentService } from '@services'
 import { C } from '@common'
+import { Commitment } from '@schemas'
 
 @Controller('commitment')
 export class CommitmentController {
@@ -12,23 +13,27 @@ export class CommitmentController {
     ) {}
 
     @Post()
-    async createCommitment(@Body() data: CreateCommitmentDto): Promise<CommitmentDto> {
-        const { commitment, clientPublicKey } = data
+    async exchangeCommitment(@Body() data: ExchangeCommitmentDto): Promise<CommitmentDto> {
+        const { clientCommitment, clientPublicKey } = data
 
-        const existedCommitment = await this.commitmentService.find(commitment)
+        const existedCommitment: Commitment | null = await this.commitmentService.find(clientCommitment)
 
         if (existedCommitment) {
             throw new BadRequestException('Commitment already exists')
         }
 
-        await this.commitmentService.create(commitment, clientPublicKey)
+        try {
+            await this.commitmentService.create(clientCommitment, clientPublicKey)
+        } catch ({ message }) {
+            throw new InternalServerErrorException('Error at commitmentService.create', message)
+        }
 
         const privateKey = this.configService.get<string>('privateKey')
         const keyPair = C.secp256k1.keyFromPrivate(privateKey)
         const publicKey = keyPair.getPublic('hex')
+        const signature = keyPair.sign(clientCommitment + ',' + clientPublicKey).toDER('hex')
 
-        const signature = keyPair.sign(commitment + ',' + clientPublicKey).toDER('hex')
-
-        return { signature, publicKey }
+        const commitment: CommitmentDto = { signature, publicKey }
+        return commitment
     }
 }

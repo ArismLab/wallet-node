@@ -8,7 +8,7 @@ import { GoogleVerifier } from '@verifiers/google.verifier'
 import configuration from '@config'
 import * as controllers from '@controllers'
 import * as services from '@services'
-import { Commitment, CommitmentSchema, Secret, SecretSchema, Wallet, WalletSchema } from '@schemas'
+import { Commitment, CommitmentSchema, Secret, SecretSchema } from '@schemas'
 
 @Module({
     imports: [
@@ -27,7 +27,6 @@ import { Commitment, CommitmentSchema, Secret, SecretSchema, Wallet, WalletSchem
         }),
         MongooseModule.forFeature([
             { name: Commitment.name, schema: CommitmentSchema },
-            { name: Wallet.name, schema: WalletSchema },
             { name: Secret.name, schema: SecretSchema },
         ]),
         ConfigModule,

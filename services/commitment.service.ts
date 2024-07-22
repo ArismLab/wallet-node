@@ -10,14 +10,19 @@ export class CommitmentService {
         private commitmentModel: Model<CommitmentDocument>
     ) {}
 
-    async create(commitment: string, clientPublicKey: string): Promise<Commitment> {
-        return await this.commitmentModel.create({
-            commitment,
-            clientPublicKey,
-        })
+    async find(clientCommitment: string): Promise<Commitment | null> {
+        const commitment: Commitment | null = await this.commitmentModel.findOne({ clientCommitment })
+        return commitment
     }
 
-    async find(commitment: string): Promise<Commitment> {
-        return this.commitmentModel.findOne({ commitment }).exec()
+    async create(clientCommitment: string, clientPublicKey: string): Promise<Commitment> {
+        // const existed: Commitment | null = await this.commitmentModel.findOne({ clientCommitment })
+
+        // if (existed) {
+        //     throw new Error('Commitment already exists')
+        // }
+
+        const created: Commitment = await this.commitmentModel.create({ clientCommitment, clientPublicKey })
+        return created
     }
 }

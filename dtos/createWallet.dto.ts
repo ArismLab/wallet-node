@@ -1,4 +1,4 @@
-export class CreateWalletDto {
+export class WalletDto {
     readonly user: string
 
     readonly address: string

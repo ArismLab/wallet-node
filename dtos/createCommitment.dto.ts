@@ -1,8 +1,8 @@
 import { IsNotEmpty } from 'class-validator'
 
-export class CreateCommitmentDto {
+export class ExchangeCommitmentDto {
     @IsNotEmpty()
-    readonly commitment: string
+    readonly clientCommitment: string
 
     @IsNotEmpty()
     readonly clientPublicKey: string
