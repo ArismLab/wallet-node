@@ -13,6 +13,7 @@ const nodes = [
 ]
 
 const productionConfig = {
+    id: Number(process.env.NODE_ID),
     url: nodes.find((node) => node.id === Number(process.env.NODE_ID)).url,
     port: process.env.PORT,
     database: {
@@ -23,13 +24,17 @@ const productionConfig = {
 }
 
 const localConfig = {
+    id: Number(process.env.NODE_ID),
     url: `http://127.0.0.1:300${process.env.NODE_ID}`,
     port: 3000 + Number(process.env.NODE_ID),
     database: {
         mongoUri: `mongodb+srv://kiet1618:12052002@kltn.mbww3bu.mongodb.net/node${process.env.NODE_ID}?retryWrites=true&w=majority`,
     },
     privateKey: process.env[`NODE${process.env.NODE_ID}_PRIVATE_KEY`],
-    nodes: nodes,
+    nodes: nodes.map((node) => ({
+        ...node,
+        url: `http://127.0.0.1:300${node.id}`,
+    })),
 }
 
 export default () => (isLocal ? localConfig : productionConfig)

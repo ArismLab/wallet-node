@@ -6,13 +6,9 @@ import { GoogleVerifier } from './google.verifier'
 export class VerifyGuard implements CanActivate {
     constructor(private readonly googleVerifier: GoogleVerifier) {}
 
-    canActivate(
-        context: ExecutionContext
-    ): boolean | Promise<boolean> | Observable<boolean> {
+    canActivate(context: ExecutionContext): boolean | Promise<boolean> | Observable<boolean> {
         const request = context.switchToHttp().getRequest()
         const { idToken, user } = request.body
         return this.googleVerifier.verify(idToken, user)
-
-        return true
     }
 }

@@ -6,10 +6,10 @@ export type CommitmentDocument = HydratedDocument<Commitment>
 @Schema({ timestamps: true })
 export class Commitment {
     @Prop({ required: true })
-    commitment: string
+    clientCommitment: string
 
-    @Prop()
-    tempPublicKey: string
+    @Prop({ required: true })
+    clientPublicKey: string
 }
 
 export const CommitmentSchema = SchemaFactory.createForClass(Commitment)

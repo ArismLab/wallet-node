@@ -1,6 +1,2 @@
-export * from './constructMasterShare.dto'
-export * from './createCommitment.dto'
+export * from './secret.dto'
 export * from './commitment.dto'
-export * from './masterShare.dto'
-export * from './receiveShare.dto'
-export * from './createWallet.dto'

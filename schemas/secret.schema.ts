@@ -8,11 +8,11 @@ export class Secret {
     @Prop({ required: true, lowercase: true, trim: true })
     user: string
 
-    @Prop()
+    @Prop({ required: true })
     secret: string
 
-    @Prop()
-    receivedShares: string[]
+    @Prop({ required: true })
+    claimedShares: string[]
 
     @Prop()
     masterShare: string

@@ -1,37 +1,37 @@
-import { BadRequestException, Body, Controller, Post } from '@nestjs/common'
+import { BadRequestException, Body, Controller, InternalServerErrorException, Post } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
-import { CommitmentDto, CreateCommitmentDto } from '@dtos'
 import { CommitmentService } from '@services'
-import { EC } from '@common'
+import { C } from '@common'
+import { Commitment } from '@schemas'
+import { ExchangeCommitmentRequest, ExchangeCommitmentResponse } from '@dtos'
 
 @Controller('commitment')
 export class CommitmentController {
     constructor(
         private readonly commitmentService: CommitmentService,
-        private configService: ConfigService
+        private readonly configService: ConfigService
     ) {}
 
     @Post()
-    async createCommitment(
-        @Body() data: CreateCommitmentDto
-    ): Promise<CommitmentDto> {
-        const { commitment, tempPublicKey } = data
+    async exchangeCommitment(@Body() data: ExchangeCommitmentRequest): Promise<ExchangeCommitmentResponse> {
+        const { clientCommitment, clientPublicKey } = data
 
-        const existedCommitment = await this.commitmentService.find(commitment)
-
+        const existedCommitment: Commitment | null = await this.commitmentService.find(clientCommitment)
         if (existedCommitment) {
             throw new BadRequestException('Commitment already exists')
         }
 
-        await this.commitmentService.create(commitment, tempPublicKey)
+        try {
+            await this.commitmentService.create(clientCommitment, clientPublicKey)
+        } catch ({ message }) {
+            throw new InternalServerErrorException('Error at commitmentService.create', message)
+        }
 
         const privateKey = this.configService.get<string>('privateKey')
-        const keyPair = EC.secp256k1.keyFromPrivate(privateKey)
+        const keyPair = C.secp256k1.keyFromPrivate(privateKey)
         const publicKey = keyPair.getPublic('hex')
-
-        const signature = keyPair
-            .sign(commitment + ',' + tempPublicKey)
-            .toDER('hex')
+        // TODO: USE THIS
+        const signature = keyPair.sign(clientCommitment + ',' + clientPublicKey).toDER('hex')
 
         return { signature, publicKey }
     }
