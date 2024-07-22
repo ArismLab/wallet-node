@@ -5,14 +5,24 @@ import {
     Get,
     InternalServerErrorException,
     Post,
+    Query,
     UseGuards,
 } from '@nestjs/common'
 import { C, E, H } from '@common'
 import { ConfigService } from '@nestjs/config'
 import { VerifyGuard } from '@verifiers/verify.guard'
-import { IssueShareDto, ConstructMasterShareDto } from '@dtos'
 import { CommitmentService, SecretService } from '@services'
 import { Secret } from '@schemas'
+import {
+    ConstructMasterShareRequest,
+    ConstructMasterShareResponse,
+    DerivePublicKeyRequest,
+    DerivePublicKeyResponse,
+    InitializeSecretRequest,
+    InitializeSecretResponse,
+    IssueShareRequest,
+    IssueShareResponse,
+} from '@dtos'
 
 @Controller('secret')
 export class SecretController {
@@ -22,8 +32,8 @@ export class SecretController {
         private readonly configService: ConfigService
     ) {}
 
-    @Get('derive-public-key') // from client+node
-    async derivePublicKey(@Body() data: { user: string }): Promise<string> {
+    @Get('derive-public-key?') // from client+node
+    async derivePublicKey(@Query() data: DerivePublicKeyRequest): Promise<DerivePublicKeyResponse> {
         const { user } = data
 
         const secret: Secret | null = await this.secretService.find(user)
@@ -31,28 +41,29 @@ export class SecretController {
             throw new BadRequestException('Not found secret by user')
         }
 
-        const publicKey: string = C.getPublicKeyFromPrivateKey(secret.masterShare)
-        return publicKey
+        const publicKey: string = C.getPublicKeyFromPrivateKey(secret.secret)
+        return { publicKey }
     }
 
     @Post('initialize-secret') // from client
-    async initializeSecret(@Body() data: { user: string }): Promise<string> {
+    async initializeSecret(@Body() data: InitializeSecretRequest): Promise<InitializeSecretResponse> {
         try {
             const publicKey = await this.secretService.initialize(data.user)
-            return publicKey
+            return { publicKey }
         } catch ({ message }) {
             throw new InternalServerErrorException('Error at secretService.initialize', message)
         }
     }
 
     @Post('issue-share') // from nodes
-    async issueShare(@Body() data: IssueShareDto): Promise<void> {
-        await this.secretService.claimShare(data.user, data.share)
+    async issueShare(@Body() data: IssueShareRequest): Promise<IssueShareResponse> {
+        const { user, share } = data
+        await this.secretService.claimShare(user, share)
     }
 
     @Post('construct-master-share') // from client
     @UseGuards(VerifyGuard)
-    async constructMasterShare(@Body() data: ConstructMasterShareDto): Promise<Ecies> {
+    async constructMasterShare(@Body() data: ConstructMasterShareRequest): Promise<ConstructMasterShareResponse> {
         const { idToken, clientPublicKey, commitment, user } = data
 
         const hashedIdToken = H.keccak256(idToken)

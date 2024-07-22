@@ -16,6 +16,7 @@ export class CommitmentService {
     }
 
     async create(clientCommitment: string, clientPublicKey: string): Promise<Commitment> {
+        // TODO: TEST PURPOSE ONLY
         // const existed: Commitment | null = await this.commitmentModel.findOne({ clientCommitment })
 
         // if (existed) {

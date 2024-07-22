@@ -10,7 +10,5 @@ export class VerifyGuard implements CanActivate {
         const request = context.switchToHttp().getRequest()
         const { idToken, user } = request.body
         return this.googleVerifier.verify(idToken, user)
-
-        return true
     }
 }

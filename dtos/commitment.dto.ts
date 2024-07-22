@@ -1,5 +1,8 @@
-export class CommitmentDto {
-    readonly signature: string
-
-    readonly publicKey: string
+export type ExchangeCommitmentRequest = {
+    clientCommitment: string
+    clientPublicKey: string
+}
+export type ExchangeCommitmentResponse = {
+    publicKey: string
+    signature: string
 }
