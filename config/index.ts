@@ -6,10 +6,10 @@ dotenv.config({ path: isLocal ? '.env.local' : '.env' })
 const nodes = [
     {
         id: 1,
-        url: 'https://node1-arismlab.onrender.com/',
+        url: 'https://node1-arismlab.onrender.com',
     },
-    { id: 2, url: 'https://node2-arismlab.onrender.com/' },
-    { id: 3, url: 'https://node3-arismlab.onrender.com/' },
+    { id: 2, url: 'https://node2-arismlab.onrender.com' },
+    { id: 3, url: 'https://node3-arismlab.onrender.com' },
 ]
 
 const productionConfig = {
