@@ -4,5 +4,4 @@ export type ExchangeCommitmentRequest = {
 }
 export type ExchangeCommitmentResponse = {
     publicKey: string
-    signature: string
 }

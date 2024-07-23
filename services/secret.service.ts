@@ -86,6 +86,20 @@ export class SecretService {
         }
     }
 
+    async deriveMasterShare(user: string): Promise<string> {
+        const secret: Secret = await this.secretModel.findOne({ user })
+
+        if (!secret) {
+            throw new Error('Not found secret for user')
+        }
+        if (!secret.masterShare) {
+            throw new Error('Not enough claimed shares')
+        }
+
+        const masterShare = secret.masterShare
+        return masterShare
+    }
+
     async constructMasterShare(user: string): Promise<string> {
         const secret: Secret = await this.secretModel.findOne({ user })
 

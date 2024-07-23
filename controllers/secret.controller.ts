@@ -16,6 +16,8 @@ import { Secret } from '@schemas'
 import {
     ConstructMasterShareRequest,
     ConstructMasterShareResponse,
+    DeriveMasterShareRequest,
+    DeriveMasterShareResponse,
     DerivePublicKeyRequest,
     DerivePublicKeyResponse,
     InitializeSecretRequest,
@@ -45,6 +47,37 @@ export class SecretController {
         return { publicKey }
     }
 
+    @Post('derive-master-share') // from client
+    @UseGuards(VerifyGuard)
+    async deriveMasterShare(@Body() data: DeriveMasterShareRequest): Promise<DeriveMasterShareResponse> {
+        const { idToken, clientPublicKey, nodeCommitment, user } = data
+
+        const hashedIdToken = H.keccak256(idToken)
+        const existedCommitment = await this.commitmentService.find(hashedIdToken)
+        if (!existedCommitment) {
+            throw new BadRequestException("Commitment of Id Token doesn't exist.")
+        }
+
+        const privateKey: string = this.configService.get<string>('privateKey')
+        const publicKey: string = C.getPublicKeyFromPrivateKey(privateKey)
+        if (nodeCommitment !== publicKey) {
+            throw new BadRequestException('Commitment does not contain in this node')
+        }
+
+        const secret: Secret | null = await this.secretService.find(user)
+        if (!secret) {
+            throw new BadRequestException('Not found secret by user')
+        }
+
+        try {
+            const masterShare: string = await this.secretService.deriveMasterShare(user)
+            const ecies = await E.encrypt(clientPublicKey, masterShare)
+            return ecies
+        } catch ({ message }) {
+            throw new InternalServerErrorException('Error at secretService.deriveMasterShare', message)
+        }
+    }
+
     @Post('initialize-secret') // from client
     async initializeSecret(@Body() data: InitializeSecretRequest): Promise<InitializeSecretResponse> {
         try {
@@ -64,7 +97,7 @@ export class SecretController {
     @Post('construct-master-share') // from client
     @UseGuards(VerifyGuard)
     async constructMasterShare(@Body() data: ConstructMasterShareRequest): Promise<ConstructMasterShareResponse> {
-        const { idToken, clientPublicKey, commitment, user } = data
+        const { idToken, clientPublicKey, nodeCommitment, user } = data
 
         const hashedIdToken = H.keccak256(idToken)
         const existedCommitment = await this.commitmentService.find(hashedIdToken)
@@ -74,7 +107,7 @@ export class SecretController {
 
         const privateKey: string = this.configService.get<string>('privateKey')
         const publicKey: string = C.getPublicKeyFromPrivateKey(privateKey)
-        if (commitment.publicKey !== publicKey) {
+        if (nodeCommitment !== publicKey) {
             throw new BadRequestException('Commitment does not contain in this node')
         }
 

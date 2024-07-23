@@ -4,24 +4,19 @@ export type DerivePublicKeyRequest = {
 export type DerivePublicKeyResponse = {
     publicKey: string
 }
-export type InitializeSecretRequest = {
-    user: string
-}
-export type InitializeSecretResponse = {
-    publicKey: string
-}
+export type InitializeSecretRequest = DerivePublicKeyRequest
+export type InitializeSecretResponse = DerivePublicKeyResponse
 export type IssueShareRequest = {
     user: string
     share: string
 }
 export type IssueShareResponse = void
-export type ConstructMasterShareRequest = {
+export type DeriveMasterShareRequest = {
     idToken: string
     clientPublicKey: string
-    commitment: {
-        signature: string
-        publicKey: string
-    }
+    nodeCommitment: string
     user: string
 }
-export type ConstructMasterShareResponse = Ecies
+export type DeriveMasterShareResponse = Ecies
+export type ConstructMasterShareRequest = DeriveMasterShareRequest
+export type ConstructMasterShareResponse = DeriveMasterShareResponse

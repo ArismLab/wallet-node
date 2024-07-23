@@ -33,6 +33,6 @@ export class CommitmentController {
         // TODO: USE THIS
         const signature = keyPair.sign(clientCommitment + ',' + clientPublicKey).toDER('hex')
 
-        return { signature, publicKey }
+        return { publicKey }
     }
 }
